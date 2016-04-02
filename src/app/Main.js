@@ -3,15 +3,18 @@ import RaisedButton from 'material-ui/lib/raised-button'
 import Dialog from 'material-ui/lib/dialog'
 import { blue600 } from 'material-ui/lib/styles/colors'
 import {default as raf} from 'raf'
+import Catalyst from 'react-catalyst'
+import reactMixin from 'react-mixin'
 import FlatButton from 'material-ui/lib/flat-button'
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme'
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider'
 import ToolbarBusStop from './toolbar'
 import IncomingBusItem from './item'
 import LoadingSpinner from './loading'
-import Card from 'material-ui/lib/card/card';
+import Card from 'material-ui/lib/card/card'
 import request from 'reqwest'
 import when from 'when'
+import constants, { STOP_URL } from './constants'
 
 
 const geolocation = (
@@ -56,11 +59,16 @@ class Main extends React.Component {
     super(props, context);
     this.handleRequestClose = this.handleRequestClose.bind(this);
     this.handleTouchTap = this.handleTouchTap.bind(this);
+    this.renderBus = this.renderBus.bind(this);
+    this.handleDirectionToggle = this.handleDirectionToggle.bind(this);
 
     this.state = {
+      loading: true,
       open: false,
       incomingBus: undefined,
+      direction: undefined,
     };
+
   }
 
   componentDidMount () {
@@ -79,6 +87,17 @@ class Main extends React.Component {
     });
   }
 
+  handleDirectionToggle() {
+    let newDirection = ( this.state.direction === 'in' ? 'out' : 'in' );
+    // TODO: this setState won't change app state,
+    //       only refer this to the calling one -- not desirable
+    this.setState({
+      direction: newDirection,
+      loading: true,
+    });
+    this.getBusStopNearby(newDirection);
+  }
+
   getCurrentLocation() {
     navigator.geolocation.getCurrentPosition((position) => {
       this.setState({
@@ -86,7 +105,7 @@ class Main extends React.Component {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
         },
-        content: "Location found using HTML5.",
+        content: "Location found",
       });
       const tick = () => {
         this.setState({ radius: Math.max(this.state.radius - 20, 0) });
@@ -110,35 +129,46 @@ class Main extends React.Component {
     });
   }
 
-  getBusStopNearby() {
-    let url = 'http://traffy.dev/stop/';
+  getBusStopNearby(direction) {
     let app = this;
+    let dataParam = {
+      bus: '73ก',
+      range: 1000,
+      limit: 1,
+      near: `${app.state.coords.lat},${app.state.coords.lon}`,
+    };
+    if (direction !== undefined)
+      dataParam['direction'] = direction;
 
     when(request({
-      // url: BUS_LOCATION_URL + '?t=' + Date.now(),
-      url: `${url}`,
+      url: constants.STOP_URL,
       method: 'GET',
       type: 'json',
-      data: {
-        bus: '73ก',
-        range: 1000,
-        limit: 2,
-        near: `${app.state.coords.lat},${app.state.coords.lon}`,
-      },
+      data: dataParam,
     }).then(function(response) {
+      // always return value anyhow
+      let direction = dataParam['direction'];
+      let stops = response.results;
+
+      response.results[0].routes.some((ele) => {
+        direction = ele['direction'];
+        return ele['name'].indexOf('73ก') >= 0
+      });
+
       app.setState({
-        stops: response.results,
+        stops,
+        direction,
       });
       app.getBusArrivalTime()
     }));
   }
 
   getBusArrivalTime() {
-
-    let baseUrl = 'http://traffy.dev/stop/';
+    let stop_url = constants.STOP_URL;
+    let url_suffix = constants.INCOMING_BUS_SUFFIX;
     let app = this;
     let currentStop = app.state.stops[0];
-    let url = `${baseUrl}${currentStop.id}/incoming_bus/`;
+    let url = `${stop_url}${currentStop.id}/${url_suffix}`;
 
     when(request({
       url: `${url}`,
@@ -189,7 +219,10 @@ class Main extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
-          <ToolbarBusStop stops={this.state.stops} />
+          <ToolbarBusStop
+            stops={this.state.stops}
+            direction={this.state.direction}
+            handleDirectionToggle={this.handleDirectionToggle} />
 
           { this.state.incomingBus === undefined ? this.renderBusLoading() :
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
@@ -216,5 +249,7 @@ class Main extends React.Component {
     );
   }
 }
+
+reactMixin.onClass(Main, Catalyst.LinkedStateMixin)
 
 export default Main;

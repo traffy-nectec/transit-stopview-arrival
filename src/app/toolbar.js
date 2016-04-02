@@ -9,7 +9,9 @@ import Toolbar from 'material-ui/lib/toolbar/toolbar'
 import ToolbarGroup from 'material-ui/lib/toolbar/toolbar-group'
 import ToolbarSeparator from 'material-ui/lib/toolbar/toolbar-separator'
 import ToolbarTitle from 'material-ui/lib/toolbar/toolbar-title'
-import { blue600 } from 'material-ui/lib/styles/colors'
+import { blue600, orange700} from 'material-ui/lib/styles/colors'
+import FloatingActionButton from 'material-ui/lib/floating-action-button'
+import ActionUpdate from 'material-ui/lib/svg-icons/action/update'
 import LoadingSpinner from './loading'
 import CircularProgress from 'material-ui/lib/circular-progress'
 import MapsPlace from 'material-ui/lib/svg-icons/maps/place'
@@ -48,6 +50,16 @@ const toolbarStyles = {
     marginLeft: 10,
     marginRight: 20,
   },
+
+  floatingButton: {
+    margin: 0,
+    top: 'auto',
+    right: 40,
+    bottom: 40,
+    left: 'auto',
+    position: 'fixed',
+  },
+
 };
 
 class BusStopDetail extends React.Component {
@@ -58,12 +70,6 @@ class BusStopDetail extends React.Component {
       in: 'สวนสยาม - สะพานพุทธ',
       out: 'สะพานพุทธ - สวนสยาม',
     }
-    let direction = 'in';
-    this.props.stop.routes.some((ele) => {
-      direction = ele['direction'];
-      return ele['name'].indexOf('73ก') >= 0
-    });
-
     return (
       <div style={toolbarStyles.groupLeft}>
         <div style={toolbarStyles.icon}>
@@ -71,7 +77,7 @@ class BusStopDetail extends React.Component {
         </div>
         <div style={toolbarStyles.titleRow}>
           <span style={toolbarStyles.titleBusDetail}>
-            สาย 73ก {directionText[direction]} มุ่งหน้า
+            สาย 73ก {directionText[this.props.direction]} มุ่งหน้า
           </span>
           <span style={toolbarStyles.titleCurrentStop}>
             {this.props.stop.name}
@@ -95,11 +101,24 @@ class ToolbarBusStop extends React.Component {
     }
 
     return (
+      <div>
+
+      <FloatingActionButton
+          mini={true}
+          backgroundColor={orange700}
+          style={toolbarStyles.floatingButton}
+          onTouchTap={this.props.handleDirectionToggle}>
+        <ActionUpdate />
+      </FloatingActionButton>
+
       <Toolbar style={toolbarStyles.toolbar}>
         <ToolbarGroup float="left">
-          { foundStop ? <BusStopDetail stop={this.props.stops[0]} /> : <LoadingSpinner /> }
+          { foundStop ? <BusStopDetail
+                          direction={this.props.direction}
+                          stop={this.props.stops[0]} /> :
+                        <LoadingSpinner /> }
         </ToolbarGroup>
-        <ToolbarGroup float="right">
+        {/*<ToolbarGroup float="right">
           <FontIcon className="muidocs-icon-custom-sort" />
           <IconMenu
             iconButtonElement={
@@ -111,8 +130,9 @@ class ToolbarBusStop extends React.Component {
             <MenuItem primaryText="ขาไป/ขากลับ" />
             <MenuItem primaryText="Map" />
           </IconMenu>
-        </ToolbarGroup>
+        </ToolbarGroup>*/}
       </Toolbar>
+      </div>
     )
   }
 
