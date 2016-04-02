@@ -59,7 +59,7 @@ class Main extends React.Component {
 
     this.state = {
       open: false,
-      incomingBus: [],
+      incomingBus: undefined,
     };
   }
 
@@ -110,17 +110,8 @@ class Main extends React.Component {
     });
   }
 
-  incomingBusLoadWaiting() {
-    return (
-      <Card style={styles.middleItem}>
-          <LoadingSpinner />
-          <div><p>&nbsp;</p></div>
-      </Card>
-    )
-  }
-
   getBusStopNearby() {
-    let url = 'http://api.traffy.xyz/stop/';
+    let url = 'http://traffy.dev/stop/';
     let app = this;
 
     when(request({
@@ -144,25 +135,46 @@ class Main extends React.Component {
 
   getBusArrivalTime() {
 
-    let url = 'http://cloud.traffy.in.th/attapon/API/private_apis/arrival_time_next.php';
+    let baseUrl = 'http://traffy.dev/stop/';
     let app = this;
-    let currentStopId = app.state.stops[0].stop_id;
+    let currentStop = app.state.stops[0];
+    let url = `${baseUrl}${currentStop.id}/incoming_bus/`;
 
     when(request({
-      // url: BUS_LOCATION_URL + '?t=' + Date.now(),
       url: `${url}`,
       method: 'GET',
       type: 'json',
-      data: {
-        stop_id: currentStopId,
-      },
     }).then(function(response) {
-      let busList = response.buslists;
+      let busList = response.bus_list;
       app.setState({
-        incomingBus: busList.map((ele) => return (ele.bmta_id ? ele : null)),
+        incomingBus: busList.map((ele) => (ele.bmta_id ? ele : null)),
       });
     }));
 
+  }
+
+  renderBus(key) {
+    return (
+      <IncomingBusItem key={key} index={key}
+        details={this.state.incomingBus[key]} />
+    )
+  }
+
+  renderNoBus() {
+    return (
+      <Card style={styles.middleItem}>
+          <div><p>ยังไม่มีรถออกจากอู่</p></div>
+      </Card>
+    )
+  }
+
+  renderBusLoading() {
+    return (
+      <Card style={styles.middleItem}>
+          <LoadingSpinner />
+          <div><p>&nbsp;</p></div>
+      </Card>
+    )
   }
 
   render() {
@@ -179,8 +191,9 @@ class Main extends React.Component {
         <div style={styles.container}>
           <ToolbarBusStop stops={this.state.stops} />
 
-          { this.state.incomingBus.length > 0 ?
-              <IncomingBusItem /> : this.incomingBusLoadWaiting() }
+          { this.state.incomingBus === undefined ? this.renderBusLoading() :
+              this.state.incomingBus.length === 0 ? this.renderNoBus() :
+                Object.keys(this.state.incomingBus).map(this.renderBus) }
 
           <div style={styles.footer}>
             <Dialog
