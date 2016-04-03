@@ -1,9 +1,9 @@
 import React from 'react';
 import Card from 'material-ui/lib/card/card';
 import CardActions from 'material-ui/lib/card/card-actions';
-import CardHeader from 'material-ui/lib/card/card-header';
-import FlatButton from 'material-ui/lib/flat-button';
-import CardText from 'material-ui/lib/card/card-text';
+import CardHeader from 'material-ui/lib/card/card-header'
+import FlatButton from 'material-ui/lib/flat-button'
+import CardText from 'material-ui/lib/card/card-text'
 
 
 const styles = {
@@ -60,10 +60,10 @@ const IncomingBusItem = () => (
         <div style={styles.busInfo}>
           <i className="fa fa-bus"></i>
           &nbsp;
-          8-67107
+          {this.props.detail.bmta_id}
         </div>
         <div style={styles.whereAt}>
-          ป้ายบิ๊กซีราชดำรี
+          {this.props.detail.current_stop_name}
         </div>
       </div>
 
@@ -71,10 +71,14 @@ const IncomingBusItem = () => (
         <ul style={styles.unstyledList}>
           <li style={styles.muted}>ถึงใน</li>
           <li style={styles.minuteBox}>
-            <span style={styles.minuteInt}>3</span>
+            <span style={styles.minuteInt}>
+              {this.props.detail.predict_time}
+            </span>
             <span style={styles.muted}>นาที</span>
           </li>
-          <li style={styles.stopRelInfo}>2 ป้าย</li>
+          <li style={styles.stopRelInfo}>
+            {this.props.detail.number_of_nexts} ป้าย
+          </li>
         </ul>
       </div>
       </div>

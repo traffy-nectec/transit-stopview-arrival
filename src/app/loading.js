@@ -1,5 +1,5 @@
-import React from 'react';
-import RefreshIndicator from 'material-ui/lib/refresh-indicator';
+import React from 'react'
+import RefreshIndicator from 'material-ui/lib/refresh-indicator'
 
 
 const style = {

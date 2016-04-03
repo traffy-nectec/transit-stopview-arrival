@@ -1,6 +1,4 @@
 import React from 'react'
-import RaisedButton from 'material-ui/lib/raised-button'
-import Dialog from 'material-ui/lib/dialog'
 import { blue600 } from 'material-ui/lib/styles/colors'
 import {default as raf} from 'raf'
 import Catalyst from 'react-catalyst'
@@ -11,11 +9,15 @@ import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider'
 import ToolbarBusStop from './toolbar'
 import IncomingBusItem from './item'
 import LoadingSpinner from './loading'
+import Footer from './footer'
 import Card from 'material-ui/lib/card/card'
 import request from 'reqwest'
 import when from 'when'
 import constants, { STOP_URL } from './constants'
+import ga from 'react-ga'
 
+
+ga.initialize(constants.GA_TRACKING_ID);
 
 const geolocation = (
   navigator.geolocation || {
@@ -31,10 +33,6 @@ const styles = {
     marginRight: 'auto',
     textAlign: 'left',
     maxWidth: 780,
-  },
-  footer: {
-    marginTop: '1em',
-    textAlign: 'center',
   },
   middleItem: {
     padding: 30,
@@ -73,6 +71,7 @@ class Main extends React.Component {
 
   componentDidMount () {
     this.getCurrentLocation();
+    ga.pageview('/bus/');
   }
 
   handleRequestClose() {
@@ -88,6 +87,8 @@ class Main extends React.Component {
   }
 
   handleDirectionToggle() {
+    ga.event( { category: 'route',
+                action: 'Switch route direction' } );
     let newDirection = ( this.state.direction === 'in' ? 'out' : 'in' );
     // TODO: this setState won't change app state,
     //       only refer this to the calling one -- not desirable
@@ -159,16 +160,16 @@ class Main extends React.Component {
         stops,
         direction,
       });
-      app.getBusArrivalTime()
+      app.getBusArrivalTime(stops[0].id)
     }));
   }
 
-  getBusArrivalTime() {
+  getBusArrivalTime(stopId) {
     let stop_url = constants.STOP_URL;
     let url_suffix = constants.INCOMING_BUS_SUFFIX;
     let app = this;
-    let currentStop = app.state.stops[0];
-    let url = `${stop_url}${currentStop.id}/${url_suffix}`;
+    let currentStopId = stopId || app.state.stops[0].id;
+    let url = `${stop_url}${currentStopId}/${url_suffix}`;
 
     when(request({
       url: `${url}`,
@@ -178,6 +179,7 @@ class Main extends React.Component {
       let busList = response.bus_list;
       app.setState({
         incomingBus: busList.map((ele) => (ele.bmta_id ? ele : null)),
+        loading: false,
       });
     }));
 
@@ -186,7 +188,7 @@ class Main extends React.Component {
   renderBus(key) {
     return (
       <IncomingBusItem key={key} index={key}
-        details={this.state.incomingBus[key]} />
+        detail={this.state.incomingBus[key]} />
     )
   }
 
@@ -224,26 +226,11 @@ class Main extends React.Component {
             direction={this.state.direction}
             handleDirectionToggle={this.handleDirectionToggle} />
 
-          { this.state.incomingBus === undefined ? this.renderBusLoading() :
+          { this.state.loading ? this.renderBusLoading() :
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
                 Object.keys(this.state.incomingBus).map(this.renderBus) }
 
-          <div style={styles.footer}>
-            <Dialog
-              open={this.state.open}
-              title="Super Secret Password"
-              actions={standardActions}
-              onRequestClose={this.handleRequestClose}
-            >
-              1-2-3-4-5
-            </Dialog>
-            <RaisedButton
-              label="เสนอแนะ / ติชม"
-              primary={true}
-              onTouchTap={this.handleTouchTap}
-            />
-          </div>
-
+        <Footer />
         </div>
       </MuiThemeProvider>
     );
