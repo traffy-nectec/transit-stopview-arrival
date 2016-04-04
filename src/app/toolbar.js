@@ -39,8 +39,8 @@ const toolbarStyles = {
   },
 
   titleCurrentStop: {
-    fontSize: 40,
-    fontWeight: 200,
+    fontSize: 35,
+    fontWeight: 300,
     paddingTop: 20,
     lineHeight: 1,
   },
@@ -58,6 +58,7 @@ const toolbarStyles = {
     bottom: 40,
     left: 'auto',
     position: 'fixed',
+    zIndex: 10,
   },
 
 };

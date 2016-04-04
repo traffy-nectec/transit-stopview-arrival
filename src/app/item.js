@@ -35,7 +35,7 @@ const styles = {
   },
   minuteInt: {
     fontSize: 50,
-    fontWeight: 200,
+    fontWeight: 300,
   },
   muted: {
     color: '#aaa',
@@ -46,8 +46,8 @@ const styles = {
   stopRelInfo: {
   },
   whereAt: {
-    fontSize: 40,
-    fontWeight: 200,
+    fontSize: 35,
+    fontWeight: 300,
     paddingTop: 40,
     lineHeight: 1,
   },
