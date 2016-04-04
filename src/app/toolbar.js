@@ -106,6 +106,7 @@ class ToolbarBusStop extends React.Component {
 
       <FloatingActionButton
           mini={true}
+          disabled={this.props.interruptProcess || this.props.dblClickProtection}
           backgroundColor={orange700}
           style={toolbarStyles.floatingButton}
           onTouchTap={this.props.handleDirectionToggle}>

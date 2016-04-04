@@ -4,6 +4,7 @@ import {default as raf} from 'raf'
 import Catalyst from 'react-catalyst'
 import reactMixin from 'react-mixin'
 import FlatButton from 'material-ui/lib/flat-button'
+import Snackbar from 'material-ui/lib/snackbar'
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme'
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider'
 import ToolbarBusStop from './toolbar'
@@ -59,19 +60,50 @@ class Main extends React.Component {
     this.handleTouchTap = this.handleTouchTap.bind(this);
     this.renderBus = this.renderBus.bind(this);
     this.handleDirectionToggle = this.handleDirectionToggle.bind(this);
+    this.cancelDblClickProtection = this.cancelDblClickProtection.bind(this);
+
+    this.reload = this.reload.bind(this);
 
     this.state = {
       loading: true,
+      snackBarShow: true,
+      snackBarText: 'กำลังค้นหาตำแหน่งของคุณ...',
+      snackBarDuration: 10000,
       open: false,
       incomingBus: undefined,
       direction: undefined,
+      intervalCount: 0,
+      stops: [],
+      interruptProcess: false,  // skip interval 'til interrupt process is done
+      dblClickProtection: false,
     };
 
   }
 
+  reload() {
+    console.log('reload : ' + this.state.interruptProcess);
+    if (this.state.interruptProcess)
+      return;
+
+    let intervalCount = this.state.intervalCount;
+
+    if (intervalCount % 7 === 0) {
+      this.getCurrentLocation();
+      if (this.state.coords !== undefined) {
+        intervalCount = 0;
+      }
+
+    } else if (this.state.stops.length > 0) {
+      this.getBusArrivalTime(this.state.stops[0].id);
+    }
+    intervalCount++;
+    this.setState({ intervalCount });
+  }
+
   componentDidMount () {
-    this.getCurrentLocation();
     ga.pageview('/bus/');
+    this.reload();
+    setInterval(this.reload, 12000);
   }
 
   handleRequestClose() {
@@ -87,6 +119,7 @@ class Main extends React.Component {
   }
 
   handleDirectionToggle() {
+
     ga.event( { category: 'route',
                 action: 'Switch route direction' } );
     let newDirection = ( this.state.direction === 'in' ? 'out' : 'in' );
@@ -95,17 +128,32 @@ class Main extends React.Component {
     this.setState({
       direction: newDirection,
       loading: true,
+      interruptProcess: true,
+      dblClickProtection: true,
     });
     this.getBusStopNearby(newDirection);
+    setTimeout(this.cancelDblClickProtection, 2000);
+  }
+
+  cancelDblClickProtection() {
+    this.setState({
+      dblClickProtection: false,
+    })
   }
 
   getCurrentLocation() {
+    this.setState({
+      snackBarShow: true,
+      snackBarText: 'กำลังค้นหาตำแหน่งของคุณ...',
+      snackBarDuration: 10000,
+    });
     navigator.geolocation.getCurrentPosition((position) => {
       this.setState({
         coords: {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
         },
+        snackBarShow: false,
         content: "Location found",
       });
       const tick = () => {
@@ -116,21 +164,32 @@ class Main extends React.Component {
         }
       };
       raf(tick);
-      this.getBusStopNearby();
+      this.getBusStopNearby(this.state.direction);
 
     }, (reason) => {
+      // we don't care setting prefix if we do have one
+      if (this.state.coords !== undefined)
+        return;
+      // set default value if not set
       this.setState({
         coords: {
           lat: 13.747271,
           lon: 100.540467,
         },
+        snackBarShow: false,
         content: `Error: The Geolocation service failed (${ reason }).`,
       });
-      this.getBusStopNearby();
+      this.getBusStopNearby(this.state.direction);
     });
   }
 
   getBusStopNearby(direction) {
+    this.setState({
+      snackBarShow: true,
+      snackBarText: 'ค้นหาข้อมูลรถเมล์...',
+      snackBarDuration: 1000,
+    });
+
     let app = this;
     let dataParam = {
       bus: '73ก',
@@ -177,9 +236,14 @@ class Main extends React.Component {
       type: 'json',
     }).then(function(response) {
       let busList = response.bus_list;
+      let onlyValid = busList.filter(
+          ele => ele.bmta_id && ele.predict_time !== "NA"
+        );
+      onlyValid.sort( (a, b) => ( +a.number_of_nexts > +b.number_of_nexts) );
       app.setState({
-        incomingBus: busList.map((ele) => (ele.bmta_id ? ele : null)),
+        incomingBus: onlyValid,
         loading: false,
+        interruptProcess: false,
       });
     }));
 
@@ -224,13 +288,20 @@ class Main extends React.Component {
           <ToolbarBusStop
             stops={this.state.stops}
             direction={this.state.direction}
-            handleDirectionToggle={this.handleDirectionToggle} />
+            handleDirectionToggle={this.handleDirectionToggle}
+            interruptProcess={this.state.interruptProcess}
+            dblClickProtection={this.state.dblClickProtection} />
 
           { this.state.loading ? this.renderBusLoading() :
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
                 Object.keys(this.state.incomingBus).map(this.renderBus) }
 
         <Footer />
+        <Snackbar
+          open={this.state.snackBarShow}
+          message={this.state.snackBarText}
+          autoHideDuration={this.state.snackBarDuration}
+        />
         </div>
       </MuiThemeProvider>
     );
