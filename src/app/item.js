@@ -53,36 +53,43 @@ const styles = {
   },
 };
 
-const IncomingBusItem = () => (
-  <Card>
-    <div style={styles.cardBus}>
-      <div style={styles.stopInfo}>
-        <div style={styles.busInfo}>
-          <i className="fa fa-bus"></i>
-          &nbsp;
-          {this.props.detail.bmta_id}
-        </div>
-        <div style={styles.whereAt}>
-          {this.props.detail.current_stop_name}
-        </div>
-      </div>
+class IncomingBusItem extends React.Component {
 
-      <div style={styles.timeInfo}>
-        <ul style={styles.unstyledList}>
-          <li style={styles.muted}>ถึงใน</li>
-          <li style={styles.minuteBox}>
-            <span style={styles.minuteInt}>
-              {this.props.detail.predict_time}
-            </span>
-            <span style={styles.muted}>นาที</span>
-          </li>
-          <li style={styles.stopRelInfo}>
-            {this.props.detail.number_of_nexts} ป้าย
-          </li>
-        </ul>
-      </div>
-      </div>
-  </Card>
-);
+  render() {
+
+    return (
+      <Card>
+        <div style={styles.cardBus}>
+          <div style={styles.stopInfo}>
+            <div style={styles.busInfo}>
+              <i className="fa fa-bus"></i>
+              &nbsp;
+              {this.props.detail.bmta_id}
+            </div>
+            <div style={styles.whereAt}>
+              {this.props.detail.current_stop_name}
+            </div>
+          </div>
+
+          <div style={styles.timeInfo}>
+            <ul style={styles.unstyledList}>
+              <li style={styles.muted}>ถึงใน</li>
+              <li style={styles.minuteBox}>
+                <span style={styles.minuteInt}>
+                  {this.props.detail.predict_time}
+                </span>
+                <span style={styles.muted}>นาที</span>
+              </li>
+              <li style={styles.stopRelInfo}>
+                {this.props.detail.number_of_nexts} ป้าย
+              </li>
+            </ul>
+          </div>
+          </div>
+      </Card>
+    )
+  }
+
+}
 
 export default IncomingBusItem;
