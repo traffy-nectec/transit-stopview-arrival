@@ -9,3 +9,7 @@ body {
   margin: 0;
 }
 
+.unstyleLink a, .unstyleLink a:hover, .unstyleLink a:visited {
+  text-decoration: none;
+  color: #06f;
+}

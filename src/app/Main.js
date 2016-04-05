@@ -16,6 +16,7 @@ import request from 'reqwest'
 import when from 'when'
 import constants, { STOP_URL } from './constants'
 import ga from 'react-ga'
+import NoUpdate from './nothing'
 
 
 ga.initialize(constants.GA_TRACKING_ID);
@@ -41,6 +42,9 @@ const styles = {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
+  },
+  muted: {
+    color: '#666',
   },
 };
 
@@ -257,11 +261,12 @@ class Main extends React.Component {
   }
 
   renderNoBus() {
-    return (
-      <Card style={styles.middleItem}>
-          <div><p>ยังไม่มีรถออกจากอู่</p></div>
-      </Card>
-    )
+    /*
+    <Card style={styles.middleItem}>
+      <div style={styles.muted}><h3>ข้อมูลไม่อัพเดท</h3></div>
+    </Card>
+    */
+    return <NoUpdate />
   }
 
   renderBusLoading() {
