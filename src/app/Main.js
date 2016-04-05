@@ -76,12 +76,12 @@ class Main extends React.Component {
       stops: [],
       interruptProcess: false,  // skip interval 'til interrupt process is done
       dblClickProtection: false,
+      geekMode: false,
     };
 
   }
 
   reload() {
-    console.log('reload : ' + this.state.interruptProcess);
     if (this.state.interruptProcess)
       return;
 
@@ -296,7 +296,7 @@ class Main extends React.Component {
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
                 Object.keys(this.state.incomingBus).map(this.renderBus) }
 
-        <Footer />
+        <Footer geekMode={this.state.geekMode} />
         <Snackbar
           open={this.state.snackBarShow}
           message={this.state.snackBarText}
