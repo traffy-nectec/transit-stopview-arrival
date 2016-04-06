@@ -17,6 +17,7 @@ import when from 'when'
 import constants, { STOP_URL } from './constants'
 import ga from 'react-ga'
 import NoUpdate from './nothing'
+import GeekConsole from './geekmode'
 
 
 ga.initialize(constants.GA_TRACKING_ID);
@@ -64,6 +65,7 @@ class Main extends React.Component {
     this.handleTouchTap = this.handleTouchTap.bind(this);
     this.renderBus = this.renderBus.bind(this);
     this.handleDirectionToggle = this.handleDirectionToggle.bind(this);
+    this.handleGeekModeToggle = this.handleGeekModeToggle.bind(this);
     this.cancelDblClickProtection = this.cancelDblClickProtection.bind(this);
 
     this.reload = this.reload.bind(this);
@@ -81,6 +83,7 @@ class Main extends React.Component {
       interruptProcess: false,  // skip interval 'til interrupt process is done
       dblClickProtection: false,
       geekMode: false,
+      debugLines: [],
     };
 
   }
@@ -122,6 +125,12 @@ class Main extends React.Component {
     });
   }
 
+  handleGeekModeToggle() {
+    this.setState({
+      geekMode: !this.state.geekMode,
+    })
+  }
+
   handleDirectionToggle() {
 
     ga.event( { category: 'route',
@@ -145,6 +154,13 @@ class Main extends React.Component {
     })
   }
 
+  addDebugConsole(data) {
+    let newdebug = this.state.debugLines.concat(data);
+    if (newdebug.length > 10)
+      newdebug = newdebug.slice(newdebug.length - 10);
+    return newdebug;
+  }
+
   getCurrentLocation() {
     this.setState({
       snackBarShow: true,
@@ -152,14 +168,18 @@ class Main extends React.Component {
       snackBarDuration: 10000,
     });
     navigator.geolocation.getCurrentPosition((position) => {
-      this.setState({
+      let debugData =
+        `[FOUND] ${position.coords.latitude},${position.coords.longitude}`;
+      let newState = {
         coords: {
           lat: position.coords.latitude,
           lon: position.coords.longitude,
         },
         snackBarShow: false,
-        content: "Location found",
-      });
+        debugLines: this.addDebugConsole(debugData),
+      }
+      this.setState(newState);
+
       const tick = () => {
         this.setState({ radius: Math.max(this.state.radius - 20, 0) });
 
@@ -175,13 +195,17 @@ class Main extends React.Component {
       if (this.state.coords !== undefined)
         return;
       // set default value if not set
+      let debugData = [
+        `[Error]: The Geolocation service failed (${ reason }).`,
+        "[NOTFOUND] Location set to around Central World",
+      ];
       this.setState({
         coords: {
           lat: 13.747271,
           lon: 100.540467,
         },
         snackBarShow: false,
-        content: `Error: The Geolocation service failed (${ reason }).`,
+        debugLines: this.addDebugConsole(debugData),
       });
       this.getBusStopNearby(this.state.direction);
     });
@@ -278,6 +302,12 @@ class Main extends React.Component {
     )
   }
 
+  renderGeekMode() {
+    if (this.state.geekMode)
+      return <GeekConsole geekStats={this.state.debugLines} />
+    return <span />
+  }
+
   render() {
     const standardActions = (
       <FlatButton
@@ -290,6 +320,7 @@ class Main extends React.Component {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
+          { this.renderGeekMode() }
           <ToolbarBusStop
             stops={this.state.stops}
             direction={this.state.direction}
@@ -301,7 +332,9 @@ class Main extends React.Component {
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
                 Object.keys(this.state.incomingBus).map(this.renderBus) }
 
-        <Footer geekMode={this.state.geekMode} />
+        <Footer
+          geekMode={this.state.geekMode}
+          geekModeToggle={this.handleGeekModeToggle} />
         <Snackbar
           open={this.state.snackBarShow}
           message={this.state.snackBarText}

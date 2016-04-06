@@ -84,13 +84,14 @@ class Footer extends React.Component {
 
         <div style={styles.sponsor}>
         { sponsorTiles.map(tile => (
-            <img src={tile.img} style={styles.sponsorImage} /> ) ) }
+            <img key={tile.title} src={tile.img} style={styles.sponsorImage} /> ) ) }
         </div>
 
         <div style={styles.geek}>
           <Toggle
             label={<HardwareVideogameAsset style={styles.iconStyles} />}
             defaultToggled={this.props.geekMode}
+            onToggle={this.props.geekModeToggle}
             labelPosition="left"
             style={styles.toggle}
           />
