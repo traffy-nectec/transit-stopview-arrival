@@ -26,7 +26,7 @@ class GeekConsole extends React.Component {
 
     return (
       <div style={geekStyles.console} className="geekConsole">
-        ==== Geek Mode [v. 0.1.2b] ====<br/>
+        ==== Geek Mode [v. 0.2] ====<br/>
         <ul>{this.props.geekStats.map(this.renderEachLine)}</ul>
       </div>
     )
