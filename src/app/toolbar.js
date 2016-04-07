@@ -113,7 +113,8 @@ class ToolbarBusStop extends React.Component {
         <ActionUpdate />
       </FloatingActionButton>
 
-      <Toolbar style={toolbarStyles.toolbar}>
+      <Toolbar style={toolbarStyles.toolbar}
+          onTouchTap={this.props.showBusStopPicker}>
         <ToolbarGroup float="left">
           { foundStop ? <BusStopDetail
                           direction={this.props.direction}

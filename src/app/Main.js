@@ -4,6 +4,7 @@ import {default as raf} from 'raf'
 import Catalyst from 'react-catalyst'
 import reactMixin from 'react-mixin'
 import FlatButton from 'material-ui/lib/flat-button'
+import Dialog from 'material-ui/lib/dialog'
 import Snackbar from 'material-ui/lib/snackbar'
 import getMuiTheme from 'material-ui/lib/styles/getMuiTheme'
 import MuiThemeProvider from 'material-ui/lib/MuiThemeProvider'
@@ -67,6 +68,9 @@ class Main extends React.Component {
     this.handleDirectionToggle = this.handleDirectionToggle.bind(this);
     this.handleGeekModeToggle = this.handleGeekModeToggle.bind(this);
     this.handleCustomBusStopToggle = this.handleCustomBusStopToggle.bind(this);
+    this.handleBusStopPickerTap = this.handleBusStopPickerTap.bind(this);
+    this.handleBusStopPickerClose = this.handleBusStopPickerClose.bind(this);
+
     this.cancelDblClickProtection = this.cancelDblClickProtection.bind(this);
 
     this.reload = this.reload.bind(this);
@@ -85,6 +89,7 @@ class Main extends React.Component {
       dblClickProtection: false,
       geekMode: false,
       customBusStop: false,
+      openBusStopPicker: false,
       debugLines: [],
     };
 
@@ -133,6 +138,23 @@ class Main extends React.Component {
     })
   }
 
+  handleBusStopPickerTap() {
+    if (!this.state.customBusStop)
+      return;
+    let newState = {
+      openBusStopPicker: true,
+    };
+    if (this.state.direction === undefined)
+      newState['direction'] = 'in';
+    this.setState(newState);
+  }
+
+  handleBusStopPickerClose() {
+    this.setState({
+      openBusStopPicker: false,
+    })
+  }
+
   handleCustomBusStopToggle() {
     this.setState({
       customBusStop: !this.state.customBusStop,
@@ -143,7 +165,7 @@ class Main extends React.Component {
 
     ga.event( { category: 'route',
                 action: 'Switch route direction' } );
-    let newDirection = ( this.state.direction === 'in' ? 'out' : 'in' );
+    let newDirection = ( this.state.direction === "in" ? "out" : "in" );
     // TODO: this setState won't change app state,
     //       only refer this to the calling one -- not desirable
     this.setState({
@@ -167,10 +189,6 @@ class Main extends React.Component {
     if (newdebug.length > constants.CONSOLE_LINE)
       newdebug = newdebug.slice(newdebug.length - constants.CONSOLE_LINE);
     return newdebug;
-  }
-
-  getBusStop() {
-
   }
 
   getCurrentLocation() {
@@ -224,8 +242,11 @@ class Main extends React.Component {
   }
 
   getBusStopNearby(direction) {
-    if (this.state.customBusStop) {  // not getting any new stop
-      app.getBusArrivalTime(stops[0].id)
+    let app = this;
+
+    if (app.state.customBusStop && app.state.stops.length > 0) {
+      // not getting any new stop
+      app.getBusArrivalTime(app.state.stops[0].id)
       return;
     }
     this.setState({
@@ -234,7 +255,6 @@ class Main extends React.Component {
       snackBarDuration: 1000,
     });
 
-    let app = this;
     let dataParam = {
       bus: '73ก',
       range: 1000,
@@ -337,7 +357,6 @@ class Main extends React.Component {
         onTouchTap={this.handleRequestClose}
       />
     );
-
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
@@ -347,24 +366,35 @@ class Main extends React.Component {
             direction={this.state.direction}
             handleDirectionToggle={this.handleDirectionToggle}
             interruptProcess={this.state.interruptProcess}
-            dblClickProtection={this.state.dblClickProtection} />
+            dblClickProtection={this.state.dblClickProtection}
+            showBusStopPicker={this.handleBusStopPickerTap} />
 
           { this.state.loading ? this.renderBusLoading() :
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
                 Object.keys(this.state.incomingBus).map(this.renderBus) }
 
-        <Footer
-          geekMode={this.state.geekMode}
-          geekModeToggle={this.handleGeekModeToggle} />
-        <Snackbar
-          open={this.state.snackBarShow}
-          message={this.state.snackBarText}
-          autoHideDuration={this.state.snackBarDuration}
-        />
+          <Footer
+            geekMode={this.state.geekMode}
+            geekModeToggle={this.handleGeekModeToggle} />
+          <Snackbar
+            open={this.state.snackBarShow}
+            message={this.state.snackBarText}
+            autoHideDuration={this.state.snackBarDuration}
+          />
+
+          <Dialog
+            title="Changing Bus Stop"
+            modal={false}
+            open={this.state.openBusStopPicker}
+            onRequestClose={this.handleBusStopPickerClose}
+            >
+            blah blah blahb
+          </Dialog>
         </div>
       </MuiThemeProvider>
     );
   }
+
 }
 
 reactMixin.onClass(Main, Catalyst.LinkedStateMixin)
