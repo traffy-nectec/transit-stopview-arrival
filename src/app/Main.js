@@ -17,7 +17,7 @@ import when from 'when'
 import constants, { STOP_URL } from './constants'
 import ga from 'react-ga'
 import NoUpdate from './nothing'
-import GeekConsole from './geekmode'
+import GeekConsole from './geek/console'
 
 
 ga.initialize(constants.GA_TRACKING_ID);
@@ -66,6 +66,7 @@ class Main extends React.Component {
     this.renderBus = this.renderBus.bind(this);
     this.handleDirectionToggle = this.handleDirectionToggle.bind(this);
     this.handleGeekModeToggle = this.handleGeekModeToggle.bind(this);
+    this.handleCustomBusStopToggle = this.handleCustomBusStopToggle.bind(this);
     this.cancelDblClickProtection = this.cancelDblClickProtection.bind(this);
 
     this.reload = this.reload.bind(this);
@@ -83,6 +84,7 @@ class Main extends React.Component {
       interruptProcess: false,  // skip interval 'til interrupt process is done
       dblClickProtection: false,
       geekMode: false,
+      customBusStop: false,
       debugLines: [],
     };
 
@@ -131,6 +133,12 @@ class Main extends React.Component {
     })
   }
 
+  handleCustomBusStopToggle() {
+    this.setState({
+      customBusStop: !this.state.customBusStop,
+    })
+  }
+
   handleDirectionToggle() {
 
     ga.event( { category: 'route',
@@ -156,9 +164,13 @@ class Main extends React.Component {
 
   addDebugConsole(data) {
     let newdebug = this.state.debugLines.concat(data);
-    if (newdebug.length > 10)
-      newdebug = newdebug.slice(newdebug.length - 10);
+    if (newdebug.length > constants.CONSOLE_LINE)
+      newdebug = newdebug.slice(newdebug.length - constants.CONSOLE_LINE);
     return newdebug;
+  }
+
+  getBusStop() {
+
   }
 
   getCurrentLocation() {
@@ -212,6 +224,10 @@ class Main extends React.Component {
   }
 
   getBusStopNearby(direction) {
+    if (this.state.customBusStop) {  // not getting any new stop
+      app.getBusArrivalTime(stops[0].id)
+      return;
+    }
     this.setState({
       snackBarShow: true,
       snackBarText: 'ค้นหาข้อมูลรถเมล์...',
@@ -304,7 +320,12 @@ class Main extends React.Component {
 
   renderGeekMode() {
     if (this.state.geekMode)
-      return <GeekConsole geekStats={this.state.debugLines} />
+      return (
+        <GeekConsole
+          geekStats={this.state.debugLines}
+          customBusStop={this.state.customBusStop}
+          handleCustomBusStopToggle={this.handleCustomBusStopToggle} />
+      )
     return <span />
   }
 

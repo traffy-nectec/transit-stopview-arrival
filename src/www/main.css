@@ -17,9 +17,8 @@ body {
 .geekConsole {
   background-color: rgba(0, 0, 0, 0.5);
   color: rgba(255, 255, 255, 0.8);
-
   font-size: 10px;
-  line-height: 1em;
+  line-height: 10px;
 }
 
 .geekConsole ul {
@@ -31,4 +30,8 @@ body {
   margin-before: 0;
   margin-after: 0;
   padding-start: 0;
+}
+
+.geekConsole hr {
+  display: none;
 }

@@ -1,4 +1,7 @@
 import React from 'react'
+import SelectField from 'material-ui/lib/select-field'
+import MenuItem from 'material-ui/lib/menus/menu-item'
+
 
 const geekStyles = {
 
@@ -12,7 +15,6 @@ const geekStyles = {
     zIndex: 100,
     padding: 5,
   },
-
 };
 
 class GeekConsole extends React.Component {
@@ -27,6 +29,12 @@ class GeekConsole extends React.Component {
     return (
       <div style={geekStyles.console} className="geekConsole">
         ==== Geek Mode [v. 0.2] ====<br/>
+        <label>
+          <input type="checkbox"
+            defaultChecked={this.props.customBusStop}
+            onClick={this.props.handleCustomBusStopToggle} />
+          custom location
+        </label>
         <ul>{this.props.geekStats.map(this.renderEachLine)}</ul>
       </div>
     )
