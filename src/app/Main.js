@@ -93,6 +93,11 @@ class Main extends React.Component {
       debugLines: [],
     };
 
+    let initState = this.getInitStateFromLocalStorage();
+    for (let k in initState) {
+      this.state[k] = initState[k];
+    }
+
   }
 
   reload() {
@@ -114,9 +119,29 @@ class Main extends React.Component {
     this.setState({ intervalCount });
   }
 
+  getInitStateFromLocalStorage() {
+
+    let localStorageGeekMode = localStorage.getItem('geekMode') || false;
+    let initState = {
+      geekMode : JSON.parse(localStorageGeekMode),
+    };
+    let localStorageLocation = localStorage.getItem('coords')
+    if (localStorageLocation) {
+      initState['coords'] = JSON.parse(localStorageLocation);
+      initState['debugLines'] = [
+        `[INIT] ${initState.coords.lat},${initState.coords.lon}`,
+      ];
+    }
+    return initState;
+  }
+
   componentDidMount () {
+    if (this.state.coords) {
+      this.getBusStopNearby(this.state.direction);
+    } else {
+      this.reload();
+    }
     ga.pageview('/bus/');
-    this.reload();
     setInterval(this.reload, 12000);
   }
 
@@ -133,6 +158,7 @@ class Main extends React.Component {
   }
 
   handleGeekModeToggle() {
+    localStorage.setItem('geekMode', JSON.stringify(!this.state.geekMode));
     this.setState({
       geekMode: !this.state.geekMode,
     })
@@ -209,6 +235,7 @@ class Main extends React.Component {
         debugLines: this.addDebugConsole(debugData),
       }
       this.setState(newState);
+      localStorage.setItem('coords', JSON.stringify(newState.coords));
 
       const tick = () => {
         this.setState({ radius: Math.max(this.state.radius - 20, 0) });
