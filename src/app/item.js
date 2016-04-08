@@ -19,10 +19,11 @@ const styles = {
     textAlign: 'center',
   },
   stopInfo: {
-    flex: 3,
+    flex: '100%',
   },
   timeInfo: {
     flex: 1,
+    minWidth: 75,
     textAlign: 'right',
   },
   minuteBox: {
@@ -36,19 +37,20 @@ const styles = {
   minuteInt: {
     fontSize: 50,
     fontWeight: 300,
+    flex: '100%',
   },
   muted: {
     color: '#aaa',
   },
-  unstyledList: {
-    listStyleType: 'none',
-  },
+  // unstyledList: {
+  //   listStyleType: 'none',
+  // },
   stopRelInfo: {
   },
   whereAt: {
     fontSize: 35,
     fontWeight: 300,
-    paddingTop: 40,
+    paddingTop: 20,
     lineHeight: 1,
   },
 };
@@ -72,7 +74,7 @@ class IncomingBusItem extends React.Component {
           </div>
 
           <div style={styles.timeInfo}>
-            <ul style={styles.unstyledList}>
+            <ul className="unstyledList">
               <li style={styles.muted}>ถึงใน</li>
               <li style={styles.minuteBox}>
                 <span style={styles.minuteInt}>

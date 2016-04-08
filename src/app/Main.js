@@ -409,14 +409,6 @@ class Main extends React.Component {
             autoHideDuration={this.state.snackBarDuration}
           />
 
-          <Dialog
-            title="Changing Bus Stop"
-            modal={false}
-            open={this.state.openBusStopPicker}
-            onRequestClose={this.handleBusStopPickerClose}
-            >
-            blah blah blahb
-          </Dialog>
         </div>
       </MuiThemeProvider>
     );

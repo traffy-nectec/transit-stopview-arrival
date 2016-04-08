@@ -5,6 +5,7 @@ import FontIcon from 'material-ui/lib/font-icon'
 import NavigationExpandMoreIcon from 'material-ui/lib/svg-icons/navigation/expand-more'
 import RaisedButton from 'material-ui/lib/raised-button'
 import MenuItem from 'material-ui/lib/menus/menu-item'
+import TextField from 'material-ui/lib/text-field'
 import Toolbar from 'material-ui/lib/toolbar/toolbar'
 import ToolbarGroup from 'material-ui/lib/toolbar/toolbar-group'
 import ToolbarSeparator from 'material-ui/lib/toolbar/toolbar-separator'
@@ -36,6 +37,7 @@ const toolbarStyles = {
     display: 'flex',
     flexDirection: 'column',
     flexWrap: 'wrap',
+    flex: '5 100%',
   },
 
   titleCurrentStop: {
@@ -46,9 +48,12 @@ const toolbarStyles = {
   },
 
   icon: {
-    verticalAlign: 'middle',
-    marginLeft: 10,
-    marginRight: 20,
+    textAlign: 'center',
+    margin: 'auto',
+    paddingRight: '0.7rem',
+    minWidth: '3rem',
+    flex: 1,
+
   },
 
   floatingButton: {
@@ -59,6 +64,10 @@ const toolbarStyles = {
     left: 'auto',
     position: 'fixed',
     zIndex: 10,
+  },
+
+  search: {
+    color: 'white',
   },
 
 };
@@ -72,17 +81,27 @@ class BusStopDetail extends React.Component {
       out: 'สะพานพุทธ - สวนสยาม',
     }
     return (
-      <div style={toolbarStyles.groupLeft}>
-        <div style={toolbarStyles.icon}>
-          <i className="fa fa-map-marker fa-4x"></i>
+      <div>
+        <div>
+          <TextField
+            hintText="พิมชื่อป้ายรถเมล์"
+            floatingLabelText="ค้นหาป้ายรถเมล์"
+            floatingLabelStyle={toolbarStyles.search}
+            underlineStyle={toolbarStyles.search}
+          />
         </div>
-        <div style={toolbarStyles.titleRow}>
-          <span style={toolbarStyles.titleBusDetail}>
-            สาย 73ก {directionText[this.props.direction]} มุ่งหน้า
-          </span>
-          <span style={toolbarStyles.titleCurrentStop}>
-            {this.props.stop.name}
-          </span>
+        <div style={toolbarStyles.groupLeft}>
+          <div style={toolbarStyles.icon}>
+            <i className="fa fa-map-marker fa-4x"></i>
+          </div>
+          <div style={toolbarStyles.titleRow}>
+            <span style={toolbarStyles.titleBusDetail}>
+              สาย 73ก {directionText[this.props.direction]} มุ่งหน้า
+            </span>
+            <span style={toolbarStyles.titleCurrentStop}>
+              {this.props.stop.name}
+            </span>
+          </div>
         </div>
       </div>
       )
@@ -121,19 +140,6 @@ class ToolbarBusStop extends React.Component {
                           stop={this.props.stops[0]} /> :
                         <LoadingSpinner /> }
         </ToolbarGroup>
-        {/*<ToolbarGroup float="right">
-          <FontIcon className="muidocs-icon-custom-sort" />
-          <IconMenu
-            iconButtonElement={
-              <IconButton touch={true}>
-                <NavigationExpandMoreIcon />
-              </IconButton>
-            }
-          >
-            <MenuItem primaryText="ขาไป/ขากลับ" />
-            <MenuItem primaryText="Map" />
-          </IconMenu>
-        </ToolbarGroup>*/}
       </Toolbar>
       </div>
     )
