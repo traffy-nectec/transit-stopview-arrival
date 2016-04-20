@@ -2,6 +2,7 @@
   "root": true, // Don't traverse ancestor directories looking for .eslintrc[.*] files to merge.
   "env": {
     "es6": true,
+    "mocha": true,
     "browser": true,
     "node": true
   },

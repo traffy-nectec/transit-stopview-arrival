@@ -84,6 +84,8 @@ class Main extends React.Component {
       incomingBus: undefined,
       direction: undefined,
       intervalCount: 0,
+      stopNearBy: undefined,
+      stopOpposite: undefined,
       stops: [],
       interruptProcess: false,  // skip interval 'til interrupt process is done
       dblClickProtection: false,
@@ -91,6 +93,7 @@ class Main extends React.Component {
       customBusStop: false,
       openBusStopPicker: false,
       debugLines: [],
+      index: 0,  // stop index
     };
 
     let initState = this.getInitStateFromLocalStorage();
@@ -170,8 +173,10 @@ class Main extends React.Component {
     let newState = {
       openBusStopPicker: true,
     };
-    if (this.state.direction === undefined)
+    if (this.state.direction === undefined) {
       newState['direction'] = 'in';
+      newState['index'] = 0;
+    }
     this.setState(newState);
   }
 
@@ -192,10 +197,12 @@ class Main extends React.Component {
     ga.event( { category: 'route',
                 action: 'Switch route direction' } );
     let newDirection = ( this.state.direction === "in" ? "out" : "in" );
+    let newIndex = ( this.state.index === 0 ? 1 : 0 );
     // TODO: this setState won't change app state,
     //       only refer this to the calling one -- not desirable
     this.setState({
       direction: newDirection,
+      index: newIndex,
       loading: true,
       interruptProcess: true,
       dblClickProtection: true,
@@ -389,8 +396,9 @@ class Main extends React.Component {
         <div style={styles.container}>
           { this.renderGeekMode() }
           <ToolbarBusStop
-            stops={this.state.stops}
-            direction={this.state.direction}
+            index={this.state.index}
+            stopNearBy={this.state.stopNearBy}
+            stopOpposite={this.state.stopOpposite}
             handleDirectionToggle={this.handleDirectionToggle}
             interruptProcess={this.state.interruptProcess}
             dblClickProtection={this.state.dblClickProtection}

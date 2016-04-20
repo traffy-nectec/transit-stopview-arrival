@@ -1,5 +1,5 @@
-import React from 'react';
-import SwipeableViews from 'react-swipeable-views';
+import React from 'react'
+import SwipeableViews from 'react-swipeable-views'
 
 
 const styles = {

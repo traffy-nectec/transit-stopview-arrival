@@ -16,6 +16,9 @@ import ActionUpdate from 'material-ui/lib/svg-icons/action/update'
 import LoadingSpinner from './loading'
 import CircularProgress from 'material-ui/lib/circular-progress'
 import MapsPlace from 'material-ui/lib/svg-icons/maps/place'
+import SwipeableViews from 'react-swipeable-views'
+import Pagination from './pagination/pagination'
+
 
 const toolbarStyles = {
 
@@ -25,6 +28,19 @@ const toolbarStyles = {
     color: '#ffffff',
     padding: 20,
     paddingBottom: 40,
+  },
+
+  toolbar2: {
+    height: 'auto',
+    backgroundColor: blue600,
+    color: '#ffffff',
+    padding: 20,
+    paddingBottom: 40,
+  },
+
+  dot: {
+    position: 'fixed',
+    zIndex: 100,
   },
 
   groupLeft: {
@@ -53,7 +69,6 @@ const toolbarStyles = {
     paddingRight: '0.7rem',
     minWidth: '3rem',
     flex: 1,
-
   },
 
   floatingButton: {
@@ -82,14 +97,14 @@ class BusStopDetail extends React.Component {
     }
     return (
       <div>
-        <div>
+        {/*<div>
           <TextField
             hintText="พิมชื่อป้ายรถเมล์"
             floatingLabelText="ค้นหาป้ายรถเมล์"
             floatingLabelStyle={toolbarStyles.search}
             underlineStyle={toolbarStyles.search}
           />
-        </div>
+        </div>*/}
         <div style={toolbarStyles.groupLeft}>
           <div style={toolbarStyles.icon}>
             <i className="fa fa-map-marker fa-4x"></i>
@@ -110,19 +125,39 @@ class BusStopDetail extends React.Component {
 
 class ToolbarBusStop extends React.Component {
 
-  constructor(props, context) {
-    super(props, context);
+  state = {
+    index: 0,
+  };
+
+  handleChangeIndex = (index) => {
+    this.setState({
+      index: index,
+    });
+    console.log('switch handleChangeIndex');
+  };
+
+  handleChangeDot = (index) => {
+    this.setState({
+      index: index,
+    });
+    console.log('switch handleChangeDot');
+  }
+
+  switchDirection() {
+    console.log('switch directin');
   }
 
   render() {
+    const { index } = this.state;
     let foundStop = false;
     if (this.props.stops) {
       foundStop = this.props.stops.length > 0;
     }
 
+
+
     return (
       <div>
-
       <FloatingActionButton
           mini={true}
           disabled={this.props.interruptProcess || this.props.dblClickProtection}
@@ -132,15 +167,38 @@ class ToolbarBusStop extends React.Component {
         <ActionUpdate />
       </FloatingActionButton>
 
-      <Toolbar style={toolbarStyles.toolbar}
-          onTouchTap={this.props.showBusStopPicker}>
-        <ToolbarGroup float="left">
-          { foundStop ? <BusStopDetail
-                          direction={this.props.direction}
-                          stop={this.props.stops[0]} /> :
-                        <LoadingSpinner /> }
-        </ToolbarGroup>
-      </Toolbar>
+      <div style={toolbarStyles.dot}>
+        <Pagination
+          dots={2}
+          index={index}
+          onChangeIndex={this.handleChangeDot}
+        />
+      </div>
+
+      <SwipeableViews
+          index={index}
+          onChangeIndex={this.handleChangeIndex}
+          onSwitching={this.switchDirection.bind(this)}
+          resistance={true}>
+        <Toolbar style={toolbarStyles.toolbar}
+            onTouchTap={this.props.showBusStopPicker}>
+          <ToolbarGroup float="left">
+            { foundStop ? <BusStopDetail
+                            direction={this.props.direction}
+                            stop={this.props.stopNearBy} /> :
+                          <span /> }
+          </ToolbarGroup>
+        </Toolbar>
+        <Toolbar style={toolbarStyles.toolbar2}
+            onTouchTap={this.props.showBusStopPicker}>
+          <ToolbarGroup float="left">
+            { foundStop ? <BusStopDetail
+                            direction={this.props.direction}
+                            stop={this.props.stopOpposite} /> :
+                          <span /> }
+          </ToolbarGroup>
+        </Toolbar>
+      </SwipeableViews>
       </div>
     )
   }
