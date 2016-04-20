@@ -40,6 +40,7 @@ const toolbarStyles = {
 
   dot: {
     position: 'fixed',
+    left: '50%',
     zIndex: 100,
   },
 
@@ -95,6 +96,7 @@ class BusStopDetail extends React.Component {
       in: 'สวนสยาม - สะพานพุทธ',
       out: 'สะพานพุทธ - สวนสยาม',
     }
+    let name = ( (this.props.stop) ? this.props.stop.name : '' );
     return (
       <div>
         {/*<div>
@@ -114,7 +116,7 @@ class BusStopDetail extends React.Component {
               สาย 73ก {directionText[this.props.direction]} มุ่งหน้า
             </span>
             <span style={toolbarStyles.titleCurrentStop}>
-              {this.props.stop.name}
+              { name }
             </span>
           </div>
         </div>
@@ -133,6 +135,7 @@ class ToolbarBusStop extends React.Component {
     this.setState({
       index: index,
     });
+    this.props.parentChangeIndex(index);
     console.log('switch handleChangeIndex');
   };
 
@@ -140,6 +143,7 @@ class ToolbarBusStop extends React.Component {
     this.setState({
       index: index,
     });
+    this.props.parentChangeIndex(index);
     console.log('switch handleChangeDot');
   }
 
@@ -153,52 +157,57 @@ class ToolbarBusStop extends React.Component {
     if (this.props.stops) {
       foundStop = this.props.stops.length > 0;
     }
+    let f = this.props.firstDirection
 
-
+    let direction0 = ( f ? f : 'in' );
+    let direction1 = ( (direction0 === 'in') ? 'out' : 'in' );
+    let stop0 = this.props.stopNearBy[0];
+    let stop1 = this.props.stopNearBy[1];
 
     return (
       <div>
-      <FloatingActionButton
-          mini={true}
-          disabled={this.props.interruptProcess || this.props.dblClickProtection}
-          backgroundColor={orange700}
-          style={toolbarStyles.floatingButton}
-          onTouchTap={this.props.handleDirectionToggle}>
-        <ActionUpdate />
-      </FloatingActionButton>
+        {/*<FloatingActionButton
+            mini={true}
+            disabled={this.props.interruptProcess || this.props.dblClickProtection}
+            backgroundColor={orange700}
+            style={toolbarStyles.floatingButton}
+            onTouchTap={this.props.handleDirectionToggle}>
+          <ActionUpdate />
+        </FloatingActionButton>*/}
 
-      <div style={toolbarStyles.dot}>
-        <Pagination
-          dots={2}
-          index={index}
-          onChangeIndex={this.handleChangeDot}
-        />
-      </div>
+        <div style={toolbarStyles.dot}>
+          <Pagination
+            dots={2}
+            index={index}
+            onChangeIndex={this.handleChangeDot}
+          />
+        </div>
 
-      <SwipeableViews
-          index={index}
-          onChangeIndex={this.handleChangeIndex}
-          onSwitching={this.switchDirection.bind(this)}
-          resistance={true}>
-        <Toolbar style={toolbarStyles.toolbar}
-            onTouchTap={this.props.showBusStopPicker}>
-          <ToolbarGroup float="left">
-            { foundStop ? <BusStopDetail
-                            direction={this.props.direction}
-                            stop={this.props.stopNearBy} /> :
-                          <span /> }
-          </ToolbarGroup>
-        </Toolbar>
-        <Toolbar style={toolbarStyles.toolbar2}
-            onTouchTap={this.props.showBusStopPicker}>
-          <ToolbarGroup float="left">
-            { foundStop ? <BusStopDetail
-                            direction={this.props.direction}
-                            stop={this.props.stopOpposite} /> :
-                          <span /> }
-          </ToolbarGroup>
-        </Toolbar>
-      </SwipeableViews>
+        <SwipeableViews
+            index={index}
+            onChangeIndex={this.handleChangeIndex}
+            onSwitching={this.switchDirection.bind(this)}
+            resistance={true}>
+          <Toolbar style={toolbarStyles.toolbar}
+              onTouchTap={this.props.showBusStopPicker}>
+            <ToolbarGroup float="left">
+              { foundStop ? <BusStopDetail
+                              direction={direction0}
+                              stop={stop0} /> :
+                            <LoadingSpinner /> }
+            </ToolbarGroup>
+          </Toolbar>
+          <Toolbar style={toolbarStyles.toolbar2}
+              onTouchTap={this.props.showBusStopPicker}>
+            <ToolbarGroup float="left">
+              { foundStop ? <BusStopDetail
+                              direction={direction1}
+                              stop={stop1} /> :
+                            <LoadingSpinner /> }
+            </ToolbarGroup>
+          </Toolbar>
+        </SwipeableViews>
+
       </div>
     )
   }

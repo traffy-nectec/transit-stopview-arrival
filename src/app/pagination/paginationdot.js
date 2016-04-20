@@ -1,5 +1,5 @@
 import React from 'react'
-import { blue600 } from 'material-ui/lib/styles/colors'
+import { blue600, orange700 } from 'material-ui/lib/styles/colors'
 
 const styles = {
   root: {
@@ -8,14 +8,14 @@ const styles = {
     cursor: 'pointer',
   },
   dot: {
-    backgroundColor: '#669999',
+    backgroundColor: 'white',
     height: 12,
     width: 12,
     borderRadius: 6,
     margin: 3,
   },
   active: {
-    backgroundColor: 'white',
+    backgroundColor: orange700,
   },
 };
 

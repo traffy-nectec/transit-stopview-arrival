@@ -28,7 +28,7 @@ class GeekConsole extends React.Component {
 
     return (
       <div style={geekStyles.console} className="geekConsole">
-        ==== Geek Mode [v. 0.2] ====<br/>
+        ==== Geek Mode [v. 0.3.0] ====<br/>
         <label>
           <input type="checkbox"
             defaultChecked={this.props.customBusStop}

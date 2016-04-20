@@ -62,8 +62,7 @@ class Main extends React.Component {
 
   constructor(props, context) {
     super(props, context);
-    this.handleRequestClose = this.handleRequestClose.bind(this);
-    this.handleTouchTap = this.handleTouchTap.bind(this);
+    this.handleChangeIndex = this.handleChangeIndex.bind(this);
     this.renderBus = this.renderBus.bind(this);
     this.handleDirectionToggle = this.handleDirectionToggle.bind(this);
     this.handleGeekModeToggle = this.handleGeekModeToggle.bind(this);
@@ -84,8 +83,6 @@ class Main extends React.Component {
       incomingBus: undefined,
       direction: undefined,
       intervalCount: 0,
-      stopNearBy: undefined,
-      stopOpposite: undefined,
       stops: [],
       interruptProcess: false,  // skip interval 'til interrupt process is done
       dblClickProtection: false,
@@ -94,6 +91,8 @@ class Main extends React.Component {
       openBusStopPicker: false,
       debugLines: [],
       index: 0,  // stop index
+      firstDirection: undefined,
+      stopNearBy: [undefined, undefined],
     };
 
     let initState = this.getInitStateFromLocalStorage();
@@ -148,17 +147,22 @@ class Main extends React.Component {
     setInterval(this.reload, 12000);
   }
 
-  handleRequestClose() {
-    this.setState({
-      open: false,
-    });
+  getDirection(index) {
+    if ( (index === undefined && this.state.index === 0) || index === 0 ) {
+      return this.state.firstDirection || 'in';
+    }
+
+    let result = ( (this.state.firstDirection === 'in') ? 'out' : 'in' );
+    return result;
   }
 
-  handleTouchTap() {
+  handleChangeIndex = (index) => {
     this.setState({
-      open: true,
+      index: index,
+      loading: true,
     });
-  }
+    this.getBusStopNearby(this.getDirection(index));
+  };
 
   handleGeekModeToggle() {
     localStorage.setItem('geekMode', JSON.stringify(!this.state.geekMode));
@@ -307,17 +311,25 @@ class Main extends React.Component {
       // always return value anyhow
       let direction = dataParam['direction'];
       let stops = response.results;
+      let stopNearBy = app.state.stopNearBy;
+      stopNearBy[app.state.index] = stops[0];
 
       response.results[0].routes.some((ele) => {
         direction = ele['direction'];
         return ele['name'].indexOf('73ก') >= 0
       });
 
-      app.setState({
+      let newState = {
         stops,
         direction,
-      });
-      app.getBusArrivalTime(stops[0].id)
+        stopNearBy,
+      };
+
+      if (app.state.firstDirection === undefined)
+        newState['firstDirection'] = direction;
+
+      app.setState(newState);
+      app.getBusArrivalTime(stopNearBy[app.state.index].id)
     }));
   }
 
@@ -325,7 +337,7 @@ class Main extends React.Component {
     let stop_url = constants.STOP_URL;
     let url_suffix = constants.INCOMING_BUS_SUFFIX;
     let app = this;
-    let currentStopId = stopId || app.state.stops[0].id;
+    let currentStopId = stopId || app.state.stopNearBy[app.state.index];
     let url = `${stop_url}${currentStopId}/${url_suffix}`;
 
     when(request({
@@ -384,25 +396,12 @@ class Main extends React.Component {
   }
 
   render() {
-    const standardActions = (
-      <FlatButton
-        label="Okey"
-        secondary={true}
-        onTouchTap={this.handleRequestClose}
-      />
-    );
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
         <div style={styles.container}>
           { this.renderGeekMode() }
-          <ToolbarBusStop
-            index={this.state.index}
-            stopNearBy={this.state.stopNearBy}
-            stopOpposite={this.state.stopOpposite}
-            handleDirectionToggle={this.handleDirectionToggle}
-            interruptProcess={this.state.interruptProcess}
-            dblClickProtection={this.state.dblClickProtection}
-            showBusStopPicker={this.handleBusStopPickerTap} />
+          <ToolbarBusStop {...this.state}
+            parentChangeIndex={this.handleChangeIndex} />
 
           { this.state.loading ? this.renderBusLoading() :
               this.state.incomingBus.length === 0 ? this.renderNoBus() :

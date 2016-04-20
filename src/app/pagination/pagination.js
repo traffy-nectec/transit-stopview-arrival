@@ -1,6 +1,5 @@
 import React from 'react'
-
-import PaginationDot from './PaginationDot'
+import PaginationDot from './paginationdot'
 
 const styles = {
   root: {
