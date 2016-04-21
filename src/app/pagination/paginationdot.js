@@ -8,7 +8,7 @@ const styles = {
     cursor: 'pointer',
   },
   dot: {
-    backgroundColor: 'white',
+    backgroundColor: '#d3d3d3',
     height: 12,
     width: 12,
     borderRadius: 6,

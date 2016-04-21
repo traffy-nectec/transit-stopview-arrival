@@ -51,7 +51,7 @@ const styles = {
     fontSize: 35,
     fontWeight: 300,
     paddingTop: 20,
-    lineHeight: 1,
+    lineHeight: 1.2,
   },
 };
 

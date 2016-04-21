@@ -295,7 +295,7 @@ class Main extends React.Component {
 
     let dataParam = {
       bus: '73ก',
-      range: 1000,
+      range: 10000,
       limit: 1,
       near: `${app.state.coords.lat},${app.state.coords.lon}`,
     };
