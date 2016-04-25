@@ -18,6 +18,7 @@ import CircularProgress from 'material-ui/lib/circular-progress'
 import MapsPlace from 'material-ui/lib/svg-icons/maps/place'
 import SwipeableViews from 'react-swipeable-views'
 import Pagination from './pagination/pagination'
+import ga from 'react-ga'
 
 
 const toolbarStyles = {
@@ -108,7 +109,8 @@ class BusStopDetail extends React.Component {
           />
         </div>*/}
         <div style={toolbarStyles.groupLeft}>
-          <div style={toolbarStyles.icon}>
+          <div style={toolbarStyles.icon}
+            onTouchTap={this.props.updateLocation}>
             <i className="fa fa-map-marker fa-4x"></i>
           </div>
           <div style={toolbarStyles.titleRow}>
@@ -136,7 +138,8 @@ class ToolbarBusStop extends React.Component {
       index: index,
     });
     this.props.parentChangeIndex(index);
-    console.log('switch handleChangeIndex');
+    ga.event( { category: 'actions',
+                action: 'swipe to change direction'} );
   };
 
   handleChangeDot = (index) => {
@@ -144,11 +147,18 @@ class ToolbarBusStop extends React.Component {
       index: index,
     });
     this.props.parentChangeIndex(index);
-    console.log('switch handleChangeDot');
+    ga.event( { category: 'actions',
+                action: 'tap dot to change direction'} );
   }
 
-  switchDirection() {
-    console.log('switch directin');
+  // switchDirection() {
+  //   console.log('switch directin');
+  // }
+
+  updateLocation() {
+    this.props.forceUpdateLocation();
+    ga.event( { category: 'actions',
+                action: 'force location update'} );
   }
 
   render() {
@@ -186,14 +196,14 @@ class ToolbarBusStop extends React.Component {
         <SwipeableViews
             index={index}
             onChangeIndex={this.handleChangeIndex}
-            onSwitching={this.switchDirection.bind(this)}
             resistance={true}>
           <Toolbar style={toolbarStyles.toolbar}
               onTouchTap={this.props.showBusStopPicker}>
             <ToolbarGroup float="left">
               { foundStop ? <BusStopDetail
                               direction={direction0}
-                              stop={stop0} /> :
+                              stop={stop0}
+                              updateLocation={this.updateLocation.bind(this)} /> :
                             <LoadingSpinner /> }
             </ToolbarGroup>
           </Toolbar>
@@ -202,7 +212,8 @@ class ToolbarBusStop extends React.Component {
             <ToolbarGroup float="left">
               { foundStop ? <BusStopDetail
                               direction={direction1}
-                              stop={stop1} /> :
+                              stop={stop1}
+                              updateLocation={this.updateLocation} /> :
                             <LoadingSpinner /> }
             </ToolbarGroup>
           </Toolbar>

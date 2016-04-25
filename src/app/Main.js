@@ -401,7 +401,8 @@ class Main extends React.Component {
         <div style={styles.container}>
           { this.renderGeekMode() }
           <ToolbarBusStop {...this.state}
-            parentChangeIndex={this.handleChangeIndex} />
+            parentChangeIndex={this.handleChangeIndex}
+            forceUpdateLocation={this.getCurrentLocation.bind(this)} />
 
           { this.state.loading ? this.renderBusLoading() :
               this.state.incomingBus.length === 0 ? this.renderNoBus() :
